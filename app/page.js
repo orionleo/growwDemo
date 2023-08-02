@@ -59,7 +59,7 @@ export default function Home() {
         setPics((prev) => [...prev, ...photoCache[page].data]);
         return;
       }
-      // if(pics==null||pics.length<1) setLoading(true);
+      if(pics==null||pics.length<1) setLoading(true);
       
       try {
         const res = await axios.post(`/api/photos`, { page });
@@ -91,6 +91,7 @@ export default function Home() {
     }
     return pixelData;
   };
+  console.log(loading);
 
   return (
     <>
@@ -110,7 +111,7 @@ export default function Home() {
                   <span>{index + 1}.</span>
                   <span
                     onClick={() => router.push(`/user/${photo.user.username}`)}
-                    style={{cursor:'pointer'}}
+                    className="user-name"
                   >
                     {photo.user.username}.
                   </span>
@@ -125,11 +126,7 @@ export default function Home() {
                       width={300}
                       height={300}
                       alt={photo.alt_description}
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
-                      }}
+                      className="blur-placeholder"
                     />
                   )}
                   {/* Actual image */}
@@ -139,7 +136,7 @@ export default function Home() {
                     height={300}
                     alt={photo.alt_description}
                   />
-                  <div style={{ display: "flex" }}>
+                  <div className="likes-bar">
                     {photo.liked_by_user ? (
                       <div
                       >
@@ -152,7 +149,9 @@ export default function Home() {
                       </div>
                     )}
 
-                    <div style={{ margin: "20px", marginTop: "2px" }}>
+                    <div
+                     className="likes" 
+                    >
                       {photo.likes}
                     </div>
                     {/* <div>{photo.liked_by_user ? "true" : "false"}</div> */}

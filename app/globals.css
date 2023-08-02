@@ -146,6 +146,25 @@ a {
   animation: spin-anim 1.2s linear infinite;
 }
 
+.user-name{
+  cursor: pointer;
+}
+
+.blur-placeholder{
+  width: "100%";
+  height: "100%";
+  object-fit: "cover";
+}
+
+.likes-bar{
+  display: flex;
+}
+
+.likes{
+  margin: 20px;
+  margin-top: 2px;
+}
+
 @keyframes spin-anim {
   0% {
       transform: rotate(0deg);

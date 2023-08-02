@@ -5,6 +5,7 @@ import axios from "axios";
 import Image from "next/image";
 import Link from "next/link";
 import { Instagram } from "lucide-react"; // Assuming you have installed and imported the lucide-react library
+import "./styles.css"
 
 const User = ({ params }) => {
   const {
@@ -26,12 +27,6 @@ const User = ({ params }) => {
   const [error,setError] = useState(false);
 
   const loader = useRef(null);
-
-  console.log(error);
-  // console.log(userPhotosCache);
-  // console.log(userPhotocsPageCache);
-
-  // console.log(userPics);
 
   useEffect(() => {
     const handleObserver = (entities) => {
@@ -55,15 +50,14 @@ const User = ({ params }) => {
     };
   }, [loading]);
 
-  // console.log(loading, page);
 
   useEffect(() => {
     const fetchUser = async () => {
-      // if (!userPhotosCache[params.userId]) setLoading(true);
+      if (!userPhotosCache[params.userId]) setLoading(true);
       try {
         //         resetUserCache();
         //         resetUserPhotosCache()
-        // resetUserPhotocsPageCache()
+        //        resetUserPhotocsPageCache()
         //         return;
         if (
           userCache[params.userId] &&
@@ -119,7 +113,7 @@ const User = ({ params }) => {
 
 
   return (
-    <div style={{ height: "100%" }}>
+    <div className="user-page">
       {loading ? (
         <div className="loader-container">
           <div className="spinner"></div>
@@ -132,12 +126,8 @@ const User = ({ params }) => {
               <div>
                 {/* User's profile photo in a circular format */}
                 <div
-                  style={{
-                    width: "200px",
-                    height: "200px",
-                    borderRadius: "50%",
-                    overflow: "hidden",
-                  }}
+                 
+                  className="profile-pic"
                 >
                   <Image
                     src={
@@ -151,6 +141,7 @@ const User = ({ params }) => {
 
                 <div className="insta">
                   {/* User's Instagram handle linked to Lucide React Insta icon */}
+                  <span className="name">{userCache[params.userId].username.username}</span>
                   <Link
                     href={`https://www.instagram.com/${
                       userCache[params.userId].username.instagram_username
@@ -164,15 +155,12 @@ const User = ({ params }) => {
 
               {/* Grid of user's photos */}
               <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(3, 1fr)",
-                  gap: "10px",
-                }}
+              
+                className="user-grid"
               >
                 {userPhotosCache[params.userId].photos.map((photo) => {
                   return (
-                    <div key={photo.id} style={{}}>
+                    <div key={photo.id}>
                       <Image
                         src={photo.urls?.regular}
                         width={200}
