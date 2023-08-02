@@ -6,7 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Instagram } from "lucide-react"; // Assuming you have installed and imported the lucide-react library
 
-const page = ({ params }) => {
+const User = ({ params }) => {
   const {
     userCache,
     setUserCache,
@@ -193,4 +193,4 @@ const page = ({ params }) => {
   );
 };
 
-export default page;
+export default User;

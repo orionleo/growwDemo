@@ -92,13 +92,6 @@ export default function Home() {
     return pixelData;
   };
 
-  const onLike = async () => {
-
-  };
-  const onUnLike=async()=>{
-
-  }
-
   return (
     <>
       {loading ? (
