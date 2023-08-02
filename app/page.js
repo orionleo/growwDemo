@@ -1,95 +1,177 @@
-import Image from 'next/image'
-import styles from './page.module.css'
+"use client";
+import { useState, useRef, useEffect } from "react";
+import axios from "axios";
+import useStore from "@/utils/store";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { Heart } from "lucide-react";
+import HeartIcon from "@/components/HeartIcon";
 
 export default function Home() {
+  const router = useRouter();
+  const [pics, setPics] = useState([]);
+  const [page, setPage] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [liked, setLiked] = useState(false);
+  console.log(pics);
+
+  const { photos, setPhotos, photoCache, setPhotoCache, cacheExpiration } =
+    useStore();
+  console.log(photos);
+
+  const loader = useRef(null);
+  const currentPageRef = useRef(page);
+
+  useEffect(() => {
+    setPhotos(pics);
+  }, [pics]);
+
+  useEffect(() => {
+    const handleObserver = (entities) => {
+      const target = entities[0];
+      if (target.isIntersecting && !loading) {
+        setPage((prevPage) => prevPage + 1);
+      }
+    };
+
+    const option = {
+      root: null,
+      rootMargin: "20px",
+      threshold: 0.5,
+    };
+
+    const observer = new IntersectionObserver(handleObserver, option);
+    if (loader.current) observer.observe(loader.current);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [loading]);
+
+  useEffect(() => {
+    const fetchPhotos = async () => {
+      if (
+        photoCache[page] &&
+        Date.now() - photoCache[page].timestamp < cacheExpiration
+      ) {
+        console.log(Date.now() - photoCache[page].timestamp);
+        // Cache is still valid, use the cached data
+        setPics((prev) => [...prev, ...photoCache[page].data]);
+        return;
+      }
+      // if(pics==null||pics.length<1) setLoading(true);
+      
+      try {
+        const res = await axios.post(`/api/photos`, { page });
+        const data = res.data;
+        setPhotoCache(page, data);
+        setPics((prev) => [...prev, ...data]);
+      } catch (err) {
+        console.log(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (page !== currentPageRef.current) {
+      currentPageRef.current = page;
+      fetchPhotos();
+    }
+  }, [page]);
+
+  const decodeBlurhash = (blurhash, width, height) => {
+    const size = width * height;
+    const pixelData = [];
+    for (let i = 0; i < size; i++) {
+      const value = parseInt(blurhash.charAt(i), 36);
+      const r = value >> 16;
+      const g = (value >> 8) & 255;
+      const b = value & 255;
+      pixelData.push(r, g, b, 255);
+    }
+    return pixelData;
+  };
+
+  const onLike = async () => {
+
+  };
+  const onUnLike=async()=>{
+
+  }
+
   return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>app/page.js</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+    <>
+      {loading ? (
+        <div className="loader-container">
+          <div className="spinner"></div>
         </div>
-      </div>
+      ) : (
+        <div className="container">
+          {photos.map((photo, index) => {
+            const placeholderPixels = photo.blurhash
+              ? decodeBlurhash(photo.blurhash, 300, 300) // Change the width and height accordingly
+              : null;
+            return (
+              <div key={photo.id+page} className="post">
+                <div className="user-info">
+                  <span>{index + 1}.</span>
+                  <span
+                    onClick={() => router.push(`/user/${photo.user.username}`)}
+                    style={{cursor:'pointer'}}
+                  >
+                    {photo.user.username}.
+                  </span>
+                </div>
+                <div className="img">
+                  {/* Display the Blurhash placeholder */}
+                  {placeholderPixels && (
+                    <img
+                      src={`data:image/jpeg;base64,${Buffer.from(
+                        placeholderPixels
+                      ).toString("base64")}`}
+                      width={300}
+                      height={300}
+                      alt={photo.alt_description}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                      }}
+                    />
+                  )}
+                  {/* Actual image */}
+                  <Image
+                    src={photo.urls.regular}
+                    width={300}
+                    height={300}
+                    alt={photo.alt_description}
+                  />
+                  <div style={{ display: "flex" }}>
+                    {photo.liked_by_user ? (
+                      <div
+                      >
+                        <HeartIcon />
+                      </div>
+                    ) : (
+                      <div
+                      >
+                        <Heart />
+                      </div>
+                    )}
 
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
+                    <div style={{ margin: "20px", marginTop: "2px" }}>
+                      {photo.likes}
+                    </div>
+                    {/* <div>{photo.liked_by_user ? "true" : "false"}</div> */}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
 
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore the Next.js 13 playground.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  )
+          <div ref={loader} />
+        </div>
+      )}
+    </>
+  );
 }
