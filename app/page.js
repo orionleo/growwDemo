@@ -13,11 +13,11 @@ export default function Home() {
   const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(false);
   const [liked, setLiked] = useState(false);
-  console.log(pics);
+  // console.log(pics);
 
   const { photos, setPhotos, photoCache, setPhotoCache, cacheExpiration } =
     useStore();
-  console.log(photos);
+  // console.log(photos);
 
   const loader = useRef(null);
   const currentPageRef = useRef(page);
@@ -54,8 +54,6 @@ export default function Home() {
         photoCache[page] &&
         Date.now() - photoCache[page].timestamp < cacheExpiration
       ) {
-        console.log(Date.now() - photoCache[page].timestamp);
-        // Cache is still valid, use the cached data
         setPics((prev) => [...prev, ...photoCache[page].data]);
         return;
       }
@@ -91,7 +89,6 @@ export default function Home() {
     }
     return pixelData;
   };
-  console.log(loading);
 
   return (
     <>
@@ -108,7 +105,7 @@ export default function Home() {
             return (
               <div key={photo.id+page} className="post">
                 <div className="user-info">
-                  <span>{index + 1}.</span>
+                  <span className="index">{index + 1}.</span>
                   <span
                     onClick={() => router.push(`/user/${photo.user.username}`)}
                     className="user-name"

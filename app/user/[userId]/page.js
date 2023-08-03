@@ -66,7 +66,6 @@ const User = ({ params }) => {
           Date.now() - userPhotocsPageCache[params.userId][page].timestamp <
             cacheExpiration
         ) {
-          console.log("using cache");
           setUser(userCache[params.userId].username);
           setUserPics(userPhotosCache[params.userId].photos);
           return;
@@ -78,7 +77,6 @@ const User = ({ params }) => {
           });
           setUser(res.data.data1);
           if(res.data.data1.errors){
-            console.log("Nothing found");
             setError(true);
             return;
           }
@@ -87,7 +85,6 @@ const User = ({ params }) => {
           id: params.userId,
           page: page,
         });
-        console.log("calling setUserPhotocsPageCache");
         setUserPhotocsPageCache(params.userId, page, res.data.data2);
         setUserPics((prev) => [...prev, ...res.data.data2]);
 

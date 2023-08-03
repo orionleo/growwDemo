@@ -146,6 +146,10 @@ a {
   animation: spin-anim 1.2s linear infinite;
 }
 
+.index{
+  margin-right: 20px;
+}
+
 .user-name{
   cursor: pointer;
 }
